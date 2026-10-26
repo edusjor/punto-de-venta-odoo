@@ -1,0 +1,17 @@
+# Credenciales
+.env
+*.env.local
+
+# Respaldos (contienen datos de clientes y ventas)
+backups/*
+!backups/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

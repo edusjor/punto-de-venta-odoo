@@ -1,0 +1,76 @@
+name: odoo-restaurant
+
+services:
+  db:
+    image: ${POSTGRES_IMAGE:-postgres:17.11-bookworm}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?Definir POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Definir POSTGRES_PASSWORD en .env}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    # Sin "ports": PostgreSQL no se publica en el host
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    logging: &logging
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  odoo:
+    image: ${ODOO_IMAGE:-odoo:19.0-20261015}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      HOST: db
+      USER: ${POSTGRES_USER}
+      PASSWORD: ${POSTGRES_PASSWORD}
+      ODOO_MASTER_PASSWORD: ${ODOO_MASTER_PASSWORD:?Definir ODOO_MASTER_PASSWORD en .env}
+      ODOO_RC: /tmp/odoo.conf
+      TZ: America/Costa_Rica
+    # Genera /tmp/odoo.conf a partir de la plantilla (montada solo lectura)
+    # añadiendo las credenciales desde variables de entorno, y arranca con el
+    # entrypoint oficial de la imagen. Así "docker compose exec odoo odoo ..."
+    # (shell, -u) usa la misma configuración.
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        python3 -c 'import os; e=os.environ; t=open("/etc/odoo/odoo.conf").read(); open("/tmp/odoo.conf","w").write(t.rstrip()+"\ndb_user = "+e["USER"]+"\ndb_password = "+e["PASSWORD"]+"\nadmin_passwd = "+e["ODOO_MASTER_PASSWORD"]+"\n")'
+        chmod 600 /tmp/odoo.conf
+        exec /entrypoint.sh odoo "$$@"
+      - odoo-entrypoint
+    ports:
+      - "127.0.0.1:${ODOO_HTTP_PORT:-8069}:8069"
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./addons:/mnt/extra-addons:ro
+      - ./backups:/backups
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8069/web/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    logging: *logging
+
+volumes:
+  db-data:
+  odoo-data:
+
+networks:
+  internal:
