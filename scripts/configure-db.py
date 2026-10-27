@@ -1,5 +1,5 @@
 # Ejecutar con: odoo shell -d <base> --no-http < configure-db.py
-# Ajusta la compañía de prueba (datos FICTICIOS) a Costa Rica / CRC y la zona
+# Ajusta la compañía (The Club House) a Costa Rica / CRC y la zona
 # horaria de todos los usuarios internos.
 crc = env.ref("base.CRC")
 crc.active = True
@@ -8,7 +8,7 @@ if company.currency_id != crc:
     # Solo es posible mientras no haya asientos contables
     company.currency_id = crc
 company.write({
-    "name": "Restaurante Demo (FICTICIO)",
+    "name": "The Club House",
     "country_id": env.ref("base.cr").id,
     "city": "San José",
 })
