@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Pie del login: "Gestionar bases de datos" y "Con la tecnología de Odoo" -->
+    <template id="login_layout_sin_pie" inherit_id="web.login_layout" name="Login sin pie de Odoo">
+        <xpath expr="//div[@t-if='not disable_footer']" position="replace"/>
+    </template>
+
+    <!-- El campo "login" acepta correo o nombre de usuario (p. ej. admin, mesero.yoses) -->
+    <template id="login_correo_o_usuario" inherit_id="web.login" name="Login con correo o usuario">
+        <xpath expr="//label[@for='login']" position="replace">
+            <label for="login" class="form-label d-flex justify-content-between">Correo electrónico o usuario</label>
+        </xpath>
+        <xpath expr="//input[@id='login']" position="attributes">
+            <attribute name="placeholder">Escribe tu correo o usuario</attribute>
+        </xpath>
+    </template>
+
+    <!-- Botón "Usa una llave de acceso": se filtra de la lista auth_btns que
+         arma auth_passkey; si la lista queda vacía tampoco se muestra "- o -". -->
+    <template id="login_oauth_sin_passkey" inherit_id="web.login_oauth" priority="99" name="Login sin llave de acceso">
+        <xpath expr="//div[@t-if='auth_btns']" position="before">
+            <t t-set="auth_btns" t-value="[b for b in auth_btns if b.get('list_item_class') != 'passkey_login_link']"/>
+        </xpath>
+    </template>
+</odoo>

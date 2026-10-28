@@ -9,7 +9,7 @@
   .\scripts\create-db.ps1 -Database odoo_pruebas -Demo
 #>
 param(
-    [string]$Database = "odoo_restaurante_dev",
+    [string]$Database = "odoo_pos",
     [string]$Lang = "es_419",
     [string]$Country = "cr",
     [switch]$Demo
@@ -24,23 +24,22 @@ $envVars = @{}
 Get-Content .env | Where-Object { $_ -match '^\s*([A-Z_]+)\s*=\s*(.*)$' } | ForEach-Object {
     $envVars[$Matches[1]] = $Matches[2].Trim()
 }
-foreach ($k in "ODOO_MASTER_PASSWORD", "ODOO_ADMIN_LOGIN", "ODOO_ADMIN_PASSWORD") {
+foreach ($k in "ODOO_ADMIN_LOGIN", "ODOO_ADMIN_PASSWORD") {
     if (-not $envVars[$k]) { throw "Falta $k en .env" }
 }
 $port = if ($envVars["ODOO_HTTP_PORT"]) { $envVars["ODOO_HTTP_PORT"] } else { "8069" }
 
-$body = @{
-    jsonrpc = "2.0"; method = "call"; id = 1
-    params  = @{
-        service = "db"; method = "create_database"
-        args    = @($envVars["ODOO_MASTER_PASSWORD"], $Database, [bool]$Demo, $Lang,
-                    $envVars["ODOO_ADMIN_PASSWORD"], $envVars["ODOO_ADMIN_LOGIN"], $Country, "")
-    }
-} | ConvertTo-Json -Depth 5
-
+# Línea de comandos de Odoo ("odoo db init"): funciona con list_db = False,
+# que deja deshabilitado el gestor de bases por web.
+$demoArg = if ($Demo) { "--with-demo" } else { "" }
 Write-Host "Creando $Database (idioma $Lang, país $Country, demo=$([bool]$Demo)). Puede tardar 1-3 minutos..."
-$r = Invoke-RestMethod -Uri "http://127.0.0.1:$port/jsonrpc" -Method Post -ContentType "application/json" -Body $body -TimeoutSec 900
-if ($r.error) { throw ($r.error.data.message) }
+docker compose exec -T -e "NEW_ADMIN_LOGIN=$($envVars['ODOO_ADMIN_LOGIN'])" -e "NEW_ADMIN_PASSWORD=$($envVars['ODOO_ADMIN_PASSWORD'])" odoo `
+    sh -c "odoo db init '$Database' --language $Lang --country $Country $demoArg --username `"`$NEW_ADMIN_LOGIN`" --password `"`$NEW_ADMIN_PASSWORD`""
+if ($LASTEXITCODE -ne 0) { throw "odoo db init falló" }
+
+Write-Host "Instalando módulos propios (login simplificado)..."
+docker compose exec -T odoo odoo -d $Database -i restaurante_login --stop-after-init --no-http --log-level=warn
+if ($LASTEXITCODE -ne 0) { throw "Instalación de restaurante_login falló" }
 
 Write-Host "Aplicando moneda CRC y zona horaria America/Costa_Rica..."
 docker compose cp scripts\configure-db.py odoo:/tmp/configure-db.py

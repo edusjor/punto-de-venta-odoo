@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Solo al instalar: registro por invitación (b2b). Un admin puede
+         cambiarlo luego en Ajustes > Permisos > Acceso de clientes. -->
+    <data noupdate="1">
+        <function model="ir.config_parameter" name="set_param"
+                  eval="('auth_signup.invitation_scope', 'b2b')"/>
+    </data>
+</odoo>

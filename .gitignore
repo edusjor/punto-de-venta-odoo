@@ -1,5 +1,7 @@
 # Credenciales
 .env
+.env.*
+!.env.example
 *.env.local
 
 # Respaldos (contienen datos de clientes y ventas)

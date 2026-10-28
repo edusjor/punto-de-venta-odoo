@@ -3,7 +3,7 @@
   Respalda una base de datos de Odoo (dump de PostgreSQL + filestore).
 
 .EXAMPLE
-  .\scripts\backup.ps1                       # respalda odoo_restaurante_dev
+  .\scripts\backup.ps1                       # respalda odoo_pos
   .\scripts\backup.ps1 -Database odoo_otra
 
   Genera en backups\:
@@ -11,7 +11,7 @@
     <db>_<fecha>_filestore.tgz   (adjuntos e imágenes)
 #>
 param(
-    [string]$Database = "odoo_restaurante_dev"
+    [string]$Database = "odoo_pos"
 )
 # Continue: docker escribe progreso en stderr; los errores se detectan con $LASTEXITCODE
 $ErrorActionPreference = "Continue"

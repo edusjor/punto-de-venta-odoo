@@ -1,0 +1,25 @@
+# HTTPS automático (Let's Encrypt) para Odoo. Dominio y correo desde .env.
+{
+	email {$ACME_EMAIL}
+}
+
+{$ODOO_DOMAIN} {
+	encode gzip
+
+	# Websocket del PdV: va al puerto gevent de Odoo (workers > 0)
+	reverse_proxy /websocket* odoo:8072
+
+	reverse_proxy odoo:8069
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

@@ -1,7 +1,8 @@
 # Ejecutar con: odoo shell -d <base> --no-http < import-productos.py
 # Lee /tmp/productos.xlsx (columnas PRODUCTOS, PRECIO, CARPETA; la carpeta solo
 # se escribe en la primera fila de cada grupo), crea una categoría de PdV por
-# carpeta y los productos con precio IVA incluido. Archiva los productos y
+# carpeta y los productos con precio IVA incluido, asignados a la compañía activa
+# (en multiempresa: el restaurante para el que se importa). Archiva los productos y
 # categorías de demostración de point_of_sale / pos_restaurant.
 # Volver a ejecutarlo actualiza precios y categorías sin duplicar.
 import re
@@ -43,11 +44,15 @@ for seq, folder in enumerate(dict.fromkeys(f for f, _, _ in rows), start=1):
     categs[folder] = categ
 
 # --- Productos ---
+# Cada restaurante es una compañía independiente: los productos pertenecen a la
+# compañía activa (env.company). Sin company_id se compartirían con todas.
+company = env.company
 Product = env["product.template"].with_context(active_test=False)
 created = updated = 0
 for seq, (folder, name, price) in enumerate(rows, start=1):
     categ = categs[folder]
     vals = {
+        "company_id": company.id,
         "name": name,
         "list_price": price,
         "type": "consu",
@@ -58,7 +63,8 @@ for seq, (folder, name, price) in enumerate(rows, start=1):
         "taxes_id": [(6, 0, tax.ids)],
         "sequence": seq,
     }
-    product = Product.search([("name", "=", name), ("pos_categ_ids", "in", categ.ids)], limit=1)
+    product = Product.search([("name", "=", name), ("pos_categ_ids", "in", categ.ids),
+                              ("company_id", "in", (company.id, False))], limit=1)
     if product:
         product.write(vals)
         updated += 1
@@ -108,5 +114,5 @@ env.cr.commit()
 print(f"Productos creados: {created}, actualizados: {updated}")
 print(f"Demo borrados: {deleted}, archivados (usados en pedidos): {archived}")
 for folder, categ in categs.items():
-    print(f"  {folder}: {Product.search_count([('pos_categ_ids', 'in', categ.ids), ('active', '=', True)])} productos")
+    print(f"  {folder}: {Product.search_count([('pos_categ_ids', 'in', categ.ids), ('active', '=', True), ('company_id', '=', company.id)])} productos")
 print("Categorías PdV:", ", ".join(PosCateg.search([]).mapped("name")))

@@ -107,15 +107,17 @@ Dependencias típicas de cualquier opción:
 
 Decisión pendiente: libre (más desarrollo y mantenimiento propio) o comercial (costo recurrente y dependencia del proveedor).
 
-## 4. Bases de datos creadas
+## 4. Bases de datos
 
-| Base | Uso | Contenido |
-|---|---|---|
-| `odoo_restaurante_dev` | Desarrollo | POS, Ventas, Inventario, Contactos, POS-HR, descuentos; `l10n_cr`. Sin configuración POS creada todavía |
-| `odoo_eval_credito` | Evaluación | Lo anterior + módulos de restaurante, lealtad, autopedido y `pos_sale`; datos de la prueba de crédito (ficticios) |
-| `odoo_eval_restaurada` | Prueba de restauración | Copia de `odoo_eval_credito` restaurada desde respaldo. Se puede eliminar |
+La única base activa es `odoo_pos` (idioma `es_419`; Odoo no tiene `es_CR`): The Club House con
+sus productos, Barra Brava Yoses sin productos y un único usuario administrador. Ver el README.
 
-Las bases de evaluación usan el idioma `es_419` (Odoo no tiene `es_CR`).
+Las bases anteriores se eliminaron y quedan solo como respaldo local (los respaldos no se suben a Git):
+
+- `odoo_eval_credito` (prueba de crédito y POS de mesas, eliminada el 2026-10-27):
+  `backups/odoo_eval_credito_20261023_115607.dump`.
+- `odoo_restaurante_dev` (4 restaurantes y usuarios de demostración, eliminada el 2026-10-28):
+  `backups/odoo_restaurante_dev_20261028_120816.dump`.
 
 Fuentes de la sección 3:
 

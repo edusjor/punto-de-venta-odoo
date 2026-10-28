@@ -4,7 +4,7 @@
   No sobrescribe bases existentes: si el nombre ya existe, se detiene.
 
 .EXAMPLE
-  .\scripts\restore.ps1 -Dump backups\odoo_restaurante_dev_20261023_120000.dump -Database odoo_restaurante_restaurada
+  .\scripts\restore.ps1 -Dump backups\odoo_pos_20261028_170022.dump -Database odoo_pos_restaurada
   (el filestore se busca automáticamente como <mismo nombre>_filestore.tgz)
 #>
 param(

@@ -1,0 +1,38 @@
+# Ajustes de PRODUCCIÓN sobre docker-compose.yml. Uso en el VPS:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# (scripts/prod.sh lo abrevia: ./scripts/prod.sh up -d)
+
+services:
+  odoo:
+    volumes:
+      # Reemplaza la configuración local por la de producción (mismo destino)
+      - ./config/odoo.prod.conf:/etc/odoo/odoo.conf:ro
+
+  caddy:
+    image: ${CADDY_IMAGE:-caddy:2.11.7}
+    restart: unless-stopped
+    depends_on:
+      odoo:
+        condition: service_healthy
+    environment:
+      ODOO_DOMAIN: ${ODOO_DOMAIN:?Definir ODOO_DOMAIN en .env}
+      ACME_EMAIL: ${ACME_EMAIL:?Definir ACME_EMAIL en .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+volumes:
+  caddy-data:
+  caddy-config:
