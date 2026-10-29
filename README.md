@@ -221,6 +221,7 @@ pierde personalizaciones.
 | Módulo | Qué hace |
 |---|---|
 | `restaurante_login` | Login simplificado: campo "Correo electrónico o usuario", sin registro libre, sin llave de acceso, sin "Gestionar bases de datos" ni "Con la tecnología de Odoo". Mantiene "Restablecer contraseña" |
+| `pos_comanda_navegador` | Tipo de impresora de pedidos **"Imprimir por el navegador"**: las comandas de cocina salen por el diálogo de impresión del dispositivo (cualquier impresora o PDF) en lugar de una Epson ePOS o caja IoT. Mantiene el flujo nativo (botón Enviar, solo lo nuevo, por categorías). Para pruebas o locales sin térmica |
 
 ## Scripts
 

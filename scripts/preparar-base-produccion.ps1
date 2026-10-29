@@ -41,7 +41,7 @@ docker compose exec -T -e "NEW_ADMIN_LOGIN=$($prod['ODOO_ADMIN_LOGIN'])" -e "NEW
 if ($LASTEXITCODE -ne 0) { throw "odoo db init falló (ver /tmp/dbinit.log en el contenedor)" }
 
 Write-Host "2/6 Instalando módulos ..."
-docker compose exec -T odoo odoo -d $db -i point_of_sale,pos_restaurant,pos_hr,restaurante_login --stop-after-init --no-http --log-level=warn
+docker compose exec -T odoo odoo -d $db -i point_of_sale,pos_restaurant,pos_hr,restaurante_login,pos_comanda_navegador --stop-after-init --no-http --log-level=warn
 if ($LASTEXITCODE -ne 0) { throw "Instalación de módulos falló" }
 
 Write-Host "3/6 Compañía, moneda y zona horaria ..."

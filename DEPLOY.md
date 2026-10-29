@@ -8,7 +8,7 @@ Guía paso a paso para poner en producción Odoo 19 Community (POS de restaurant
 | Elemento | Detalle |
 |---|---|
 | Base de datos | `odoo_pos`: compañías **The Club House** (logo, 41 productos, IVA 13 % incluido) y **Barra Brava Yoses** (sin productos). Costa Rica, CRC, `es_419` |
-| Módulos | Punto de venta, Restaurante (mesas), Empleados con PIN (`pos_hr`), `restaurante_login` (login simplificado), `l10n_cr` |
+| Módulos | Punto de venta, Restaurante (mesas), Empleados con PIN (`pos_hr`), `restaurante_login` (login simplificado), `l10n_cr`. `pos_comanda_navegador` (comandas por el navegador) **no** está en el respaldo: ver "Instalar un módulo nuevo" |
 | Usuarios | `soporte@cam360cr.com` (administrador total de ambas compañías, con PIN de PdV) y `clubhouse` (cuenta de las tablets de The Club House: Punto de venta / Usuario, sin empleado) |
 | Punto de venta | Caja **The Club House** con inicio de sesión por empleado: Soporte en *Permisos avanzados*; Mesero1 y Mesero2 (empleados con PIN, sin usuario) |
 | Sin datos | Sin pedidos ni clientes. Barra Brava Yoses sin caja ni empleados |
@@ -148,6 +148,22 @@ Restaurar en una base nueva: `./scripts/restore.sh backups/<archivo>.dump odoo_p
 | Login pide elegir base / "database not found" | La base no se llama `odoo_pos` |
 | POS no se actualiza en tiempo real | `/websocket` debe ir al puerto 8072 (ya configurado en `config/Caddyfile`) |
 | Memoria insuficiente | Bajar `workers` en `config/odoo.prod.conf` y `./scripts/prod.sh restart odoo` |
+
+## Instalar un módulo nuevo (p. ej. `pos_comanda_navegador`)
+
+Con el código ya copiado en `/opt/odoo-restaurant/addons/custom/`:
+
+```bash
+cd /opt/odoo-restaurant
+./scripts/backup.sh
+./scripts/prod.sh restart odoo
+./scripts/prod.sh exec odoo odoo -c /tmp/odoo.conf -d odoo_pos -i pos_comanda_navegador --stop-after-init --no-http
+./scripts/prod.sh restart odoo
+```
+
+Luego, en el panel: **Punto de venta → Configuración → Ajustes** → caja → **Impresora de pedidos**
+→ nueva impresora de tipo **"Imprimir por el navegador"** con sus categorías. Las cajas abiertas
+deben recargarse (F5).
 
 ## Actualizar Odoo en producción
 

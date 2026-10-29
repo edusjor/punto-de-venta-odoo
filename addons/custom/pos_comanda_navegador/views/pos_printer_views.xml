@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_printer_form_comanda_navegador" model="ir.ui.view">
+        <field name="name">pos.printer.form.comanda.navegador</field>
+        <field name="model">pos.printer</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_printer_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="before">
+                <div class="alert alert-info" role="status" invisible="printer_type != 'browser'">
+                    Al enviar un pedido, la comanda se abre en el diálogo de impresión del
+                    dispositivo que lo envía: elija ahí la impresora (o "Guardar como PDF").
+                    No necesita IP.
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
